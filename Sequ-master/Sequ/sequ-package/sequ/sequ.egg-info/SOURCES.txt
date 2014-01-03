@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+sequ/__init__.py
+sequ.egg-info/PKG-INFO
+sequ.egg-info/SOURCES.txt
+sequ.egg-info/dependency_links.txt
+sequ.egg-info/entry_points.txt
+sequ.egg-info/not-zip-safe
+sequ.egg-info/top_level.txt

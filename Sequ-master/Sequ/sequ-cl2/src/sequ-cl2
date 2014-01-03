@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+import sys
+sys.path.insert(1, '/usr/local/lib/python2.7/dist-packages')
+from argparse import ArgumentParser
+from sequ.sequ import Sequ as sequ
+
+
+def create_parser():
+    parser = ArgumentParser(
+        description='Sequ cl2',
+        prog='sequ-cl2'
+    )
+    parser.add_argument(
+        "minimum",
+        metavar='minimum',
+        help="minimum",
+        nargs="?"
+    )
+    parser.add_argument(
+        "maximum",
+        metavar='maximum',
+        help="maximum"
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        '-s',
+        '--separator',
+        help='use the STRING to separate numbers',
+        nargs="?"
+    )
+    group.add_argument(
+        '-e',
+        '--equal-width',
+        help='pad 0s to each element in the list',
+        dest='equalwidth',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version='%(prog)s cl3'
+    )
+    parser.add_argument(
+        "-f",
+        '--format',
+        help='format to floating-point',
+        dest='format',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-i',
+        '--increment',
+        help='incrimental regulator',
+        nargs="?"
+    )
+    parser.add_argument(
+        '-p',
+        '--pad',
+        metavar='PAD',
+        help='pad string to create equal-width elements',
+        type=str,
+        const=True,
+        nargs="?"
+    )
+    parser.add_argument(
+        "-P",
+        '--padspaces',
+        help='pad string with ' ' to create equal-width elements',
+        dest='padspaces',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-w',
+        '--words',
+        help='outputs a single space separated string',
+        dest='words',
+        const=True,
+        action='store_const'
+    )
+    return parser
+
+
+def main():
+    parser = create_parser()
+    parser.set_defaults(func=sequ)
+    args = parser.parse_args()
+
+    if args.format:
+        for i in args.func(args.minimum, args.maximum).sequ_ret():
+            print(float(i))
+    elif args.equalwidth:
+        for i in args.func(args.minimum, args.maximum).sequ_ret():
+            print(str(i).zfill(len(str(int(float(args.maximum))))))
+    elif args.increment:
+        for i in args.func(args.minimum, args.maximum).sequ_ret():
+            print(i)
+    elif args.separator:
+        if " \ " not in args.separator:
+            s = ""
+            for i in args.func(args):
+                if i < int(args.maximum):
+                    s += str(i) + args.separator
+            s += str(i)
+            print(s)
+
+    elif args.pad:
+        if " \ " not in args.pad:
+            if len(args.pad) < 2:
+                for i in map(str, args.func(args)):
+                    if not i == '\n':
+                        len(i) < len(args.maximum)
+                        while len(i) < len(args.maximum):
+                            i = args.pad + str(i)
+                        print(i)
+            else:
+                print("Pad character length must be less than 2! ")
+        else:
+            print("String must not contain the backslash! ")
+
+    elif args.padspaces:
+        for i in map(str, args.func(args.minimum, args.maximum).sequ_ret()):
+            if len(i) < len(args.maximum):
+                while len(i) < len(args.maximum):
+                    i = " " + str(i)
+            print(i)
+
+    elif args.equalwidth:
+        for i in args.func(args.minimum, args.maximum).sequ_ret():
+            print(str(i).zfill(len(str(int(float(args.maximum))))))
+
+    elif args.words:
+        print(" ".join(map(str, args.func(args.minimum, args.maximum).sequ_ret())))
+
+    else:
+        for i in args.func(args.minimum, args.maximum).sequ_ret():
+            print(i)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,4 @@
+SEQU_CL1_PSEUDOCODE
+
+for i in range(Minimum, Maximum + 1)
+    return i

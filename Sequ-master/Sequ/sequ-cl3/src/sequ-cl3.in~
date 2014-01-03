@@ -1,0 +1,259 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+#Copyright © 2013 James Beedy
+
+# Removed increment argument. Replaced with incrementer.
+#
+import sys
+sys.path.insert(1, '/usr/local/lib/python2.7/dist-packages')
+from argparse import ArgumentParser
+import functools
+import seqmapio.sequmapio as seqmap
+import re
+from romanl.romanl import to_roman as to_romanl
+from romanl.romanl import from_roman as from_romanl
+from romanu.romanu import to_roman as to_romanu
+from romanu.romanu import from_roman as from_romanu
+import romanl.romanl
+import romanu.romanl
+
+
+def create_parser():
+    parser = ArgumentParser(
+        description='Sequ cl3',
+        prog='sequ-cl3'
+    )
+    parser.add_argument(
+        'minimum',
+        metavar='minimum',
+        help='minimum',
+        nargs='?'
+    )
+    parser.add_argument(
+        'maximum',
+        metavar='maximum',
+        help='maximum'
+    )
+    parser.add_argument(
+        'incrementer',
+        metavar='incrementer',
+        help = 'incrementer',
+        nargs='?'
+        )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        '-s',
+        '--separator',
+        help='use the STRING to separate numbers',
+        nargs="?",
+        type= str
+    )
+    group.add_argument(
+        '-e',
+        '--equal-width',
+        help='pad 0s to each element in the list < len(max)',
+        dest='equalwidth',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version='%(prog)s cl2'
+    )
+    parser.add_argument(
+        "-f",
+        '--format',
+        help='format to floating-point',
+        dest='format',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-p',
+        '--pad',
+        metavar='PAD',
+        help='pad string to create equal-width elements',
+        type=str,
+        const=True,
+        nargs="?"
+    )
+    parser.add_argument(
+        "-P",
+        '--padspaces',
+        help='pad string with ' ' to create equal-width elements',
+        dest='padspaces',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-w',
+        '--words',
+        help='outputs a single space separated string',
+        dest='words',
+        const=True,
+        action='store_const'
+    )
+    parser.add_argument(
+        '-F',
+        '--formatwords',
+        choices=['arabic',
+                 'floating',
+                 'alpha',
+                 'ALPHA',
+                 'roman',
+                 'ROMAN'],
+        help='use typesetting',
+        nargs="?"
+    )
+    return parser
+
+
+def parsefunc(args):
+    seqlst = []
+
+    seq = seqmap.SequFuncs(args)
+    low_re = re.compile("([a-z])")
+    high_re = re.compile("([A-Z])")
+    roman_numeral_pattern_upper = re.compile("""
+    ^                   # beginning of string
+    M{0,4}              # thousands - 0 to 4 M's
+    (CM|CD|D?C{0,3})    # hundreds - 900 (CM), 400 (CD), 0-300 (0 to 3 C's),
+                        #            or 500-800 (D, followed by 0 to 3 C's)
+    (XC|XL|L?X{0,3})    # tens - 90 (XC), 40 (XL), 0-30 (0 to 3 X's),
+                        #        or 50-80 (L, followed by 0 to 3 X's)
+    (IX|IV|V?I{0,3})    # ones - 9 (IX), 4 (IV), 0-3 (0 to 3 I's),
+                        #        or 5-8 (V, followed by 0 to 3 I's)
+    $                   # end of string
+    """, re.VERBOSE)
+    roman_numeral_pattern_low = re.compile("""
+    ^                   # beginning of string
+    m{0,4}              # thousands - 0 to 4 m's
+    (cm|cd|d?c{0,3})    # hundreds - 900 (cm), 400 (cd), 0-300 (0 to 3 c's),
+                        #            or 500-800 (d, followed by 0 to 3 c's)
+    (xc|xl|l?x{0,3})    # tens - 90 (xc), 40 (xl), 0-30 (0 to 3 x's),
+                        #        or 50-80 (l, followed by 0 to 3 x's)
+    (ix|iv|v?i{0,3})    # ones - 9 (ix), 4 (iv), 0-3 (0 to 3 i's),
+                        #        or 5-8 (v, followed by 0 to 3 i's)
+    $                   # end of string
+    """, re.VERBOSE)
+
+    if args.formatwords:
+        if args.formatwords == "arabic":
+            for i in seq.sequ_ret():
+                seqlst.append(i)
+        elif args.formatwords == "floating":
+            for i in seq.sequ_ret():
+                seqlst.append(float(i))
+        elif args.formatwords == "alpha":
+            for i in seq.alpha_low_sequ():
+                if (0 < int(args.minimum) < 27) and (1 < int(args.maximum) < 27):
+                    for i in seq.alpha_low_sequ():
+                        seqlst.append(chr(int(i + 96)))
+                else:
+                    print('Please use correct range for alpha (1 - 26)')
+
+        elif args.formatwords == "ALPHA":
+                if (0 < int(args.minimum) < 27) and (1 < int(args.maximum) < 27):
+                    for i in seq.alpha_low_sequ():
+                        seqlst.append(chr(int(i) + 64))
+                else:
+                    print('Please use correct range for alpha (1 - 26)')
+
+        elif args.formatwords == "roman":
+            for i in seq.roman_low_sequ():
+                seqlst.append(to_romanl(i))
+        elif args.formatwords == "ROMAN":
+            for i in seq.roman_upper_sequ():
+                seqlst.append(to_romanu(i))
+
+        else:
+            if type(args.maximum) == int:
+                for i in seq.sequ_ret():
+                    seqlst.append(i)
+            elif type(args.maximum) == float:
+                for i in seq.sequ_ret():
+                    seqlst.append(float(i))
+            elif type(args.maximum) == str:
+                if roman_numeral_pattern_upper.search(args.maximum):
+                    for i in seq.roman_upper_sequ():
+                        seqlst.append(i)
+                elif roman_numeral_pattern_low.search(args.maximum):
+                    for i in seq.roman_low_sequ():
+                        seqlst.append(i)
+                elif high_re.search(args.maximum):
+                    for i in seq.alpha_high_sequ():
+                        seqlst.append(i)
+                elif low_re.search(args.maximum):
+                    for i in seq.alpha_low_sequ():
+                        seqlst.append(i)
+                else:
+                    for i in seq.sequ_ret():
+                         seqlst.append(i)
+
+    else:
+        for i in seq.sequ_ret():
+            seqlst.append(i)
+    return seqlst
+
+
+class SeqMain:
+    def __init__(self):
+        self.parser = create_parser()
+        self.args = parser.parse_args()
+        self.p = parsefunc(args)
+        
+    def main(self):
+    
+        if self.args.format:
+    	    for i in self.p:
+	        print(float(i))
+
+        elif args.separator:
+	    if " \ " not in args.separator:
+		print(args.separator.join(map(str, p)))
+
+        elif args.equalwidth:
+	    for i in p:
+		print(str(i).zfill(len(str(int(float(args.maximum))))))
+
+        elif args.pad:
+	    if "\'" not in args.pad:
+		j = 0
+		for i in map(str, p):
+		if len(i) >= j:
+		    j = len(i)
+		k = 0
+		for i in map(str, p):
+		    if len(i) <= j:
+			k = j - len(i)
+			while len(i) < j:
+			    i = k*str(args.pad) + str(i)
+			    print(i)
+		    else:
+			print("Pad character length must be less than 2! ")
+	    else:
+		print("String must not contain the backslash! ")
+
+	elif args.padspaces:
+		j = 0
+		for i in map(str, p):
+		    if len(i) >= j:
+		        j = len(i)
+	    k = 0
+	    for i in map(str, p):
+		if len(i) < j:
+		    k = j - len(i)
+		    while len(i) < j:
+		        i = k*" " + str(i)
+	        print(i)
+
+	elif args.words:
+	    print(" ".join(map(str, p)))
+	else:
+	    for i in p:
+	        print(i)
+
+if __name__ == '__main__':
+    SeqMain.main()

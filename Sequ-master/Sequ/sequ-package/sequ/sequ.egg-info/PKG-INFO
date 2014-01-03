@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: sequ
+Version: 0.0.1dev
+Summary: Sequ cl0
+Home-page: http://sequ.jamesbeedy.com
+Author: James Beedy
+Author-email: jamesbeedy@gmail.com
+License: GPL v3
+Description: Python implementation of gnu seq
+Keywords: Python
+Platform: UNKNOWN

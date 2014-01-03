@@ -1,0 +1,25 @@
+1h::::::::::hh                    GNU GENERAL PUBLIC LICENSE
+2h::::::::::hh                       Version 3, 29 June 2007
+3h::::::::::hh
+4h::::::::::hh Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+5h::::::::::hh Everyone is permitted to copy and distribute verbatim copies
+6h::::::::::hh of this license document, but changing it is not allowed.
+7h::::::::::hh
+8h::::::::::hh                            Preamble
+9h::::::::::hh
+10h::::::::::hh  The GNU General Public License is a free, copyleft license for
+11h::::::::::hhsoftware and other kinds of works.
+12h::::::::::hh
+13h::::::::::hh  The licenses for most software and other practical works are designed
+14h::::::::::hhto take away your freedom to share and change the works.  By contrast,
+15h::::::::::hhthe GNU General Public License is intended to guarantee your freedom to
+16h::::::::::hhshare and change all versions of a program--to make sure it remains free
+17h::::::::::hhsoftware for all its users.  We, the Free Software Foundation, use the
+18h::::::::::hhGNU General Public License for most of our software; it applies also to
+19h::::::::::hhany other work released this way by its authors.  You can apply it to
+20h::::::::::hhyour programs, too.
+21h::::::::::hh
+22h::::::::::hh  When we speak of free software, we are referring to freedom, not
+23h::::::::::hhprice.  Our General Public Licenses are designed to make sure that you
+24h::::::::::hhhave the freedom to distribute copies of free software (and charge for
+25h::::::::::hhthem if you wish), that you receive source code or can get it if you

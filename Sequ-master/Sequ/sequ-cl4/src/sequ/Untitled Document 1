@@ -1,0 +1,501 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+#Copyright © 2013 James Beedy
+
+import sys
+sys.path.insert(1, '/usr/local/lib/python2.7/dist-packages')
+import re
+from sequ.romanl import to_roman as to_romanl
+from sequ.romanl import from_roman as from_romanl
+from sequ.romanl import roman_numeral_pattern_low as rom_pat_low
+from sequ.romanu import roman_numeral_pattern_upper as rom_pat_up
+from sequ.romanu import from_roman as from_romanu
+from sequ.romanu import to_roman as to_romanu
+
+#TODO: Format control!!*!*!*! -> done
+#TODO: Object orient code -> 2/3 done
+#TODO: Fix pad to accomodate larger than 1 character pads
+#TODO: Fix Increment and minimum optional values to work for all options -> Fixed
+#TODO: create character mappings for alpha and roman conversions -> Done
+
+
+class RomanLowRangeError(ValueError):
+    pass
+
+
+class RomanUpRangeError(ValueError):
+    pass
+
+
+class RomanTypeError(ValueError):
+    pass
+
+
+class MaxAndNumError(ValueError):
+    pass
+
+
+class MaxMustBeMaxInputError(ValueError):
+    pass
+
+
+class MinMustBeMinInputError(ValueError):
+    pass
+
+
+class AlphaLowRangeError(ValueError):
+    pass
+
+
+class AlphaUpRangeError(ValueError):
+    pass
+
+
+class IncrementerError(ValueError):
+    pass
+
+
+class NoInputError(ValueError):
+    pass
+
+
+class RangeInputError(ValueError):
+    pass
+
+
+class SequFuncs(object):
+    def __init__(self, args):
+        # Define compiled patterns for checking 
+        #patterns to detect valid Roman numerals
+        self.rom_num_pat_up = rom_pat_up
+        self.rom_num_pat_low = rom_pat_low
+        self.low_re = re.compile("([a-z])")
+        self.high_re = re.compile("([A-Z])")
+        self.int_map = re.compile("([0-9])")
+        # Create tmp_vlaues to hole data until 
+        #we are ready to assign it permenantly 
+        if not args.minimum:
+            tmp_minimum = 1
+            if not args.incrementer:
+                tmp_incrementer = 1
+                if not args.maximum:
+                    if not numlines:
+                        raise NoInputError('Cannot have no input!.')
+                    else:
+                        tmp_maximum = args.minimum + args.numlines # Creates a new maximum when only numlines is supplied.
+                else:
+                    if args.maximum > args.minimum: # Check that args.maximum is the maximum 
+                        tmp_maximum = args.maximum
+                    else:
+                        raise MaxMustBeMaxInputError('Maximum value must be the maximum value!')
+            else:
+                tmp_incrementer = args.incrementer
+        else:
+            if args.minimum < args.maximum: # Test to check that minimum value is the smallest of the two
+                tmp_minimum = args.minimum
+            else:
+                raise InputError('Minimum value must precede th maximum value!')
+
+        if self.rom_num_pat_low.search(tmp_minimum):
+            if self.rom_num_pat_low.search(tmp_incrementer):
+                if self.rom_num_pat_low.search(tmp_maximum):
+                    self.minimum = int(from_romanl(tmp_minimum)) 
+                    self.maximum = int(from_romanl(tmp_maximum))
+                    self.incrementer = int(from_romanl(tmp_incrementer))
+                elif type(tmp_minimum) == int:
+                    if tmp_minimum + int(from_romanl(tmp_maximum)) < 4999: # Check that input is in roman range
+                        self.minimum = tmp_minimum
+                        self.maximum = tmp_minimum + int(from_romanl(tmp_maximum))
+                        self.incrementer = int(from_romanl(tmp_incrementer))
+                    else:
+                        raise RomanlowRangeError('Please enter values within the roman range!')
+            else:
+                raise RomanTypeError('Please enter consistant value types!')
+
+        elif self.rom_num_pat_up.search(tmp_minimum):
+            if self.rom_num_pat_up.search(tmp_maximum):
+                self.minimum = int(from_romanu(tmp_minimum)) 
+                self.maximum = self.minimum + int(from_romanu(tmp_maximum))
+                self.incrementer = int(from_romanu(tmp_incrementer))
+            elif type(args.minimum) == int:
+                if args.minimum + int(from_romanu(tmp_maximum)) < 4999:
+                    self.minimum = tmp_minimum
+                    self.maximum = tmp_maximum + int(from_romanu(tmp_incremnter))
+                    self.incrementer = int(from_romanu(tmp_incrementer))
+                else: 
+                    raise RomanUpRangeError('Please enter values within the roman range!') #Check for range
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+            elif self.low_re.search(tmp_minimum):
+                if self.low_re.search(tmp_incrementer):
+                    if (ord(args.minimum) - 96) + (ord(tmp_incrementer) - 96) < 27:
+                        self.minimum = ord(tmp_minimum) - 96
+                        self.maximum = self.minimum + ord(tmp_incrementer) - 96
+                        self.incrementer = tmp_incremeneter 
+                    else:
+                        raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(tmp_minimum) == int:
+                    if (ord(tmp_minimum) - 96 + ord(tmp_incrementer) - 96) < 27:
+                        self.minimum = tmp_minimum
+                        self.maximum = tmp_minimum + ord(tmp_incrementer) - 96
+                        self.incrementer = tmp_incrementer
+                elif self.low_re.search(tmp_incrementer):
+                    if self.low_re.search(tmp_minimum):
+                        if (ord(tmp_minimum) - 96 + ord(tmp_numlines) - 96) < 27:
+                            self.minimum = ord(tmp_minimum) - 96
+                            self.maximum = self.minimum + ord(tmp_incrementer) - 96
+                            self.incrementer = tmp_incrementer
+                        else:
+                            raise AlphaUpRangeError('Please enter values within the alpha range!')
+            elif self.high_re.search(tmp_incrementer):
+                if type(tmp_incrementer) == int:
+                    if self.high_re.search(tmp_minimum):
+                        if ord(tmp_minimum) - 64 + ord(tmp_incrementer) - 64) < 27:
+                            self.minimum = ord(tmp_minimum) - 64
+                            self.maximum = self.minimum + ord(tmp_incrementer) - 64
+                            self.incrementer = tmp_incrementer
+                        else:
+                            raise AlphaLowRangeError('Please enter values within the alpha range!')
+                    elif type(tmp_minimum) == int:
+                        if (ord(tmp_minimum) - 96) + (ord(tmp_incrementer) - 96) < 27:
+                            self.minimum = tmp_minimum
+                            self.maximum = tmp_minimum + ord(tmp_numlines) - 64
+                            self.incrementer = tmp_incrementer
+                    else:
+                        if self.high_re.search(tmp_incrementer):
+                            if self.high_re.search(tmp_minimum):
+                                if (ord(tmp_minimum) - 64 + ord(tmp_incrementer) - 64) < 27:
+                                    self.minimum = ord(tmp_minimum) - 64
+                                    self.maximum = tmp_minimum + ord(tmp_icrementer) - 64
+                                    self.incrementer = tmp_incrementer
+                        else:
+                            raise AlphaUpRangeError('Please enter values within the alpha range!')
+
+                if self.int_map.search(tmp_maximum):
+                    if self.int_map.search(tmp_incrementer):
+                        if self.int_map.search(tmp_minimum):
+                            if tmp_minimum < tmp_maximum:
+                                if (tmp_incrementer * 2) < (tmp_maximum + tmp_minimum):
+                                    self.minimum = tmp_minimum 
+                                    self.maximum = tmp_maximum
+                                    self.incrementer = tmp_incrementer
+                                else:
+                                    raise IncrementerError('Please enter min < max!') 
+                            else:
+                                raise MaxAndMinError('Please enter min < max!')
+
+
+
+
+
+
+
+
+
+
+
+
+            if self.rom_num_pat_low.search(args.maximum):
+                if self.rom_num_pat_low.search(args.minimum):
+                    if self.rom_num_pat_low.search(args.incrementer):
+                        self.minimum = int(from_romanl(args.minimum)) 
+                        self.maximum = int(from_romanl(args.maximum))
+                        self.incrementer = int(from_romanl(args.incrementer))
+                    elif type(args.minimum) == int:
+                        if args.minimum + int(from_romanl(args.maximum)) < 4999:
+                            self.minimum = args.minimum
+                            self.maximum = int(from_romanl(args.maximum))
+                            self.incrementer = int(from_romanl(args.incrementer))
+                        else:
+                            raise RomanlowRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+
+            elif self.rom_num_pat_up.search(args.maximum):
+                if self.rom_num_pat_up.search(args.minimum):
+                    self.minimum = int(from_romanu(args.minimum)) 
+                    self.maximum = int(from_romanu(args.maximum))
+                    self.incrementer = int(from_romanu(args.incrementer))
+                elif type(args.minimum) == int:
+                    if args.minimum + int(from_romanu(args.maximum)) < 4999:
+                        self.minimum = args.minimum
+                        self.maximum = int(from_romanu(args.maximum))
+                        self.incrementer = int(from_romanu(args.incrementer))
+                    else: 
+                        raise RomanUpRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+
+            elif self.low_re.search(args.maximum):
+                if self.low_re.search(args.minimum):
+                    if (ord(args.minimum) - 96) + (ord(args.maximum) - 96) < 27:
+                        self.minimum = ord(args.minimum) - 96
+                        self.maximum = ord(args.maximum) - 96
+                        self.incrementer = args.incrementer
+                    else:
+                        raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(args.minimum) == int:
+                    if (ord(self.minimum) - 96 + ord(args.maximum) - 96) < 27:
+                        self.minimum = args.minimum
+                        self.maximum = ord(args.maximum) - 96
+                        self.incrementer = args.incrementer
+                elif self.low_re.search(args.maximum):
+                    if self.low_re.search(args.minimum):
+                        if (ord(args.minimum) - 96 + ord(args.maximum) - 96) < 27:
+                            self.minimum = ord(args.minimum) - 96
+                            self.maximum = ord(args.maximum) - 96
+                            self.incrementer = args.incrementer
+                        else:
+                           raise AlphaUpRangeError('Please enter values within the alpha range!')
+            elif self.high_re.search(args.maximum):
+                if type(args.incrementer) == int:
+    	            if self.high_re.search(args.minimum):
+                        if (ord(args.minimum) - 64 + ord(args.maximum) - 64) < 27:
+                            self.minimum = ord(args.minimum) - 64
+                            self.maximum = ord(args.maximum) - 64
+                            self.incrementer = args.incrementer
+                        else:
+                            raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(args.minimum) == int:
+                    if (ord(args.minimum) - 64 + ord(args.maximum) - 64) < 27:
+                        self.minimum = args.minimum
+                        self.maximum = ord(args.maximum) - 64
+                        if self.high_re.search(args.maximum):
+                            if self.high._re.search(args.minimum):
+                                if (ord(args.minimum) - 64 + ord(args.numlines) - 64) < 27:
+                                    self.minimum = ord(args.minimum) - 64
+                                    self.maximum = ord(args.maximum) - 64
+                                    self.incrementer = args.incrementer
+                                else:
+                                    raise AlphaUpRangeError('Please enter values within the alpha range!')
+                    raise InputError('There is no input!')
+                else:
+                    if maximum >= args.incrementer:
+                        self.incrementer = args.incrementer
+                        self.maximum = args.minimum
+                                                                                                                            +
+                                                                                                                            args.numlines
+                                                                                                                                    else:
+                                                                                                                                                    self.maximum
+                                                                                                                                                    =
+                                                                                                                                                    args.maximum
+
+             self.minimum = 1
+        else:
+            if args.minimum < args.maximum:
+                self.minimum = args.minimum
+            else:
+                raise MaxAndMinError(ValueError):
+        
+        if not args.incrementer:
+            self.incrementer = 1
+        else:
+            if abs(args.maximum - args.minimum) >= args.incrementer:
+                self.incrementer = args.incrementer
+        
+            if not self.maximum:class MaxAndMinError(ValueError):
+                pass
+
+            self.maximum = args.minimum + args.numlines
+        else:
+            self.maximum = args.maximum
+
+
+            
+        if args.numlines:
+            if args.maximum:
+                raise MaxAndNumlinesError('Cannot have both Maximum '
+                        + 'and number-lines arguments! Please enter the correct input.')
+            if self.int_map.search(args.numlines):
+                if self.int_map.search(args.incrementer):
+                    if self.int_map.search(args.minimum):
+                        if args.minimum < args.maximum:
+                            if (args.incrementer * 2) < (args.numlines + args.minimum):
+                                self.minimum = args.minimum 
+                                self.maximum = args.minimum + args.numlines
+                                self.incrementer = args.incrementer
+                            else:
+                                raise IncrementerError('Please enter min < max!') 
+                        else:
+                            raise MaxAndMinError('Please enter min < max!')
+                    else:
+                        raise IncrementerError("Please enter consistant values for input")
+            if self.rom_num_pat_low.search(args.numlines):
+                if self.rom_num_pat_low.search(args.minimum):
+                    if self.rom_num_pat_low.search(args.incrementer):
+                        self.minimum = int(from_romanl(args.minimum)) 
+                        self.maximum = int(from_romanl(args.numlines))
+                        self.incrementer = int(from_romanl(args.incrementer))
+                    elif type(args.minimum) == int:
+                      if args.minimum + int(from_romanl(args.numlines)) < 4999:
+                            self.minimum = args.minimum
+                            self.maximum = args.minimum + int(from_romanl(args.numlines))
+                            self.incrementer = int(from_romanl(args.incrementer))
+                    else:
+                        raise RomanlowRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+            elif self.rom_num_pat_up.search(args.numlines):
+                if self.rom_num_pat_up.search(args.minimum):
+                    self.minimum = int(from_romanu(args.minimum)) 
+                    self.maximum = self.minimum + int(from_romanu(args.numlines))
+                    self.incrementer = int(from_romanu(args.incrementer))
+                elif type(args.minimum) == int:
+                    if args.minimum + int(from_romanu(args.numlines)) < 4999:
+                        self.minimum = args.minimum
+                        self.maximum = args.minimum + int(from_romanu(args.numlines))
+                        self.incrementer = int(from_romanu(args.incrementer))
+                    else: 
+                        raise RomanUpRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+            elif self.low_re.search(args.numlines):
+                if self.low_re.search(args.minimum):
+                    if (ord(args.minimum) - 96) + (ord(args.numlines) - 96) < 27:
+                        self.minimum = ord(args.minimum) - 96
+                        self.maximum = self.minimum + ord(args.numlines) - 96
+                        self.incrementer = args.incrementer
+                    else:
+                        raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(args.minimum) == int:
+                    if (ord(self.minimum) - 96 + ord(args.numlines) - 96) < 27:
+                        self.minimum = args.minimum
+                        self.maximum = self.minimum + ord(args.numlines) - 96
+                        self.incrementer = args.incrementer
+                elif self.low_re.search(args.numlines):
+                    if self.low_re.search(args.minimum):
+                        if (ord(args.minimum) - 96 + ord(args.numlines) - 96) < 27:
+                            self.minimum = ord(args.minimum) - 96
+                            self.maximum = self.minimum + ord(args.numlines) - 96
+                            self.incrementer = args.incrementer
+                        else:
+                            raise AlphaUpRangeError('Please enter values within the alpha range!')
+            elif self.high_re.search(args.numlines):
+                if type(args.incrementer) == int:
+                    if self.high_re.search(args.minimum):
+                        if (ord(args.minimum) - 64 + ord(args.numlines) - 64) < 27:
+                            self.minimum = ord(args.minimum) - 64
+                            self.maximum = self.minimum + ord(args.numlines) - 64
+                            self.incrementer = args.incrementer
+                        else:
+                            raise AlphaLowRangeError('Please enter values within the alpha range!')
+                    elif type(args.minimum) == int:
+                        if (ord(args.minimum) - 96) + (ord(args.numlines) - 96) < 27:
+                            self.minimum = args.minimum
+                            self.maximum = args.minimum + ord(args.numlines) - 64
+                            self.incrementer = args.incrementer
+                    else:
+                        if self.high_re.search(args.numlines):
+                            if self.high_re.search(args.minimum):
+                                if (ord(args.minimum) - 64 + ord(args.numlines) - 64) < 27:
+                                    self.minimum = ord(args.minimum) - 64
+                                    self.maximum = args.minimum + ord(args.numlines) - 64
+                                    self.incrementer = args.incrementer
+                        else:
+                            raise AlphaUpRangeError('Please enter values within the alpha range!')
+                if self.int_map.search(args.maximum):
+                    if self.int_map.search(args.incrementer):
+                        if self.int_map.search(args.minimum):
+                            if args.minimum < args.maximum:
+                                if (args.incrementer * 2) < (args.maximum + args.minimum):
+                                    self.minimum = args.minimum 
+                                    self.maximum = args.maximum
+                                    self.incrementer = args.incrementer
+                                else:
+                                    raise IncrementerError('Please enter min < max!') 
+                            else:
+                                raise MaxAndMinError('Please enter min < max!')
+            if self.rom_num_pat_low.search(args.maximum):
+                if self.rom_num_pat_low.search(args.minimum):
+                    if self.rom_num_pat_low.search(args.incrementer):
+                        self.minimum = int(from_romanl(args.minimum)) 
+                        self.maximum = int(from_romanl(args.maximum))
+                        self.incrementer = int(from_romanl(args.incrementer))
+                    elif type(args.minimum) == int:
+                        if args.minimum + int(from_romanl(args.maximum)) < 4999:
+                            self.minimum = args.minimum
+                            self.maximum = int(from_romanl(args.maximum))
+                            self.incrementer = int(from_romanl(args.incrementer))
+                        else:
+                            raise RomanlowRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+
+            elif self.rom_num_pat_up.search(args.maximum):
+                if self.rom_num_pat_up.search(args.minimum):
+                    self.minimum = int(from_romanu(args.minimum)) 
+                    self.maximum = int(from_romanu(args.maximum))
+                    self.incrementer = int(from_romanu(args.incrementer))
+                elif type(args.minimum) == int:
+                    if args.minimum + int(from_romanu(args.maximum)) < 4999:
+                        self.minimum = args.minimum
+                        self.maximum = int(from_romanu(args.maximum))
+                        self.incrementer = int(from_romanu(args.incrementer))
+                    else: 
+                        raise RomanUpRangeError('Please enter values within the roman range!')
+                else:
+                    raise RomanTypeError('Please enter consistant value types!')
+
+            elif self.low_re.search(args.maximum):
+                if self.low_re.search(args.minimum):
+                    if (ord(args.minimum) - 96) + (ord(args.maximum) - 96) < 27:
+                        self.minimum = ord(args.minimum) - 96
+                        self.maximum = ord(args.maximum) - 96
+                        self.incrementer = args.incrementer
+                    else:
+                        raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(args.minimum) == int:
+                    if (ord(self.minimum) - 96 + ord(args.maximum) - 96) < 27:
+                        self.minimum = args.minimum
+                        self.maximum = ord(args.maximum) - 96
+                        self.incrementer = args.incrementer
+                elif self.low_re.search(args.maximum):
+                    if self.low_re.search(args.minimum):
+                        if (ord(args.minimum) - 96 + ord(args.maximum) - 96) < 27:
+                            self.minimum = ord(args.minimum) - 96
+                            self.maximum = ord(args.maximum) - 96
+                            self.incrementer = args.incrementer
+                        else:
+                           raise AlphaUpRangeError('Please enter values within the alpha range!')
+            elif self.high_re.search(args.maximum):
+                if type(args.incrementer) == int:
+    	            if self.high_re.search(args.minimum):
+                        if (ord(args.minimum) - 64 + ord(args.maximum) - 64) < 27:
+                            self.minimum = ord(args.minimum) - 64
+                            self.maximum = ord(args.maximum) - 64
+                            self.incrementer = args.incrementer
+                        else:
+                            raise AlphaLowRangeError('Please enter values within the alpha range!')
+                elif type(args.minimum) == int:
+                    if (ord(args.minimum) - 64 + ord(args.maximum) - 64) < 27:
+                        self.minimum = args.minimum
+                        self.maximum = ord(args.maximum) - 64
+                        if self.high_re.search(args.maximum):
+                            if self.high._re.search(args.minimum):
+                                if (ord(args.minimum) - 64 + ord(args.numlines) - 64) < 27:
+                                    self.minimum = ord(args.minimum) - 64
+                                    self.maximum = ord(args.maximum) - 64
+                                    self.incrementer = args.incrementer
+                                else:
+                                    raise AlphaUpRangeError('Please enter values within the alpha range!')
+         
+    def sequ_ret(self):
+        return range(
+            self.minimum,
+            self.maximum + 1,
+            self.incrementer
+        )
+    
+    def roman_low_sequ(self):
+        return range(
+            int(from_romanl(str(self.minimum))),
+            int(from_romanl(str(self.maximum))) + 1,
+            int(from_romanl(str(self.incrementer)))
+        )
+
+    def roman_upper_sequ(self):
+        return range(
+            int(from_romanu(str(self.minimum))),
+            int(from_romanu(str(self.maximum))) + 1,
+            int(from_romanu(str(self.incrementer)))
+        )

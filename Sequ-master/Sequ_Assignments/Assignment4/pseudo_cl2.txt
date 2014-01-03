@@ -1,0 +1,27 @@
+SEQU_CL2_PSEUDOCODE
+
+
+1. PSEUDOCODE FOR PAD
+
+if " \ " not in args.pad:
+    if len(args.pad) < 2:
+        for i in map(str, args.func(args)):
+            if not i == '\n':
+                len(i) < len(args.max)
+                while len(i) < len(args.max):
+                    i = args.pad + str(i)
+                        print(i)
+            else:
+                print("Pad character length must be less than 2! ")
+else:
+    print("String must not contain the backslash! ")
+
+
+2. PSEUDOCODE FOR PADSPACES
+
+for i in map(str, args.func(args.max)):
+        if len(i) < len(Maximum):
+            while len(i) < len(args.max):
+                i = " " + str(i)
+                print(i)
+
